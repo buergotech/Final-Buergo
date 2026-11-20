@@ -14,20 +14,41 @@ export default function App() {
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    setResult("");
-    setError("");
+ 
 
-    try {
-      const alpha2Code = getAlpha2Code(capitalize(language));
-      const languageList = await countryListLookup(alpha2Code);
-      const response = getResponse(language, languageList);
-      setResult(response);
-    } catch (err) {
-      setError(`We could not find ${language}. Please check spelling and try again.`);
+const handleSubmit = async (e: { preventDefault: () => void }) => {
+  e.preventDefault();
+
+  setResult("");
+  setError("");
+
+  if (!language.trim()) {
+    setError("Please enter a language.");
+    return;
+  }
+
+  try {
+    const alpha2Code = getAlpha2Code(capitalize(language.trim()));
+
+    if (!alpha2Code) {
+      throw new Error("Language not found");
     }
-  };
+
+    const languageList = await countryListLookup(alpha2Code);
+
+    const response = getResponse(language.trim(), languageList);
+
+    setResult(response);
+  } catch (err) {
+    console.error("Country lookup failed:", err);
+
+    setError(
+      `We could not find ${language}. Please try again.`
+    );
+  }
+};
+
+
 
   return (
      <div className="app-container">
